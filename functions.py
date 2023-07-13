@@ -8,10 +8,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def find_cards_for_country(driver,country):
-    element = driver.find_element(By.CLASS_NAME, "MuiAccordionSummary-content")
+    element = WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.CLASS_NAME, "MuiAccordionSummary-content")))
     element.click()
-    time.sleep(1)
-    element = driver.find_element(By.CLASS_NAME, "searchable-dropdown")
+    element = WebDriverWait(driver, 15).until(
+        EC.element_to_be_clickable((By.CLASS_NAME, "searchable-dropdown")))
     element.click()
     input = element.find_element(By.TAG_NAME, "input")
     input.send_keys(country)
@@ -19,30 +20,31 @@ def find_cards_for_country(driver,country):
     time.sleep(2)
 
 def find_next_page_button(driver):
-    return driver.find_elements(By.CLASS_NAME, "MuiPaginationItem-icon")[1]
+    wait = WebDriverWait(driver, 10)
+    return wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Go to next page']")))
 
 def is_next_page_enabled(driver):
     return driver.find_elements(By.CLASS_NAME, "MuiPaginationItem-root")[1].is_enabled()
 
 def enter_page_at_index(driver,index):
     page_cards = driver.find_elements(By.CLASS_NAME, "SiteCard_siteCard__3fd1c")
-    button = page_cards[index].find_element(By.TAG_NAME, "button")
-    try:
-        button.click()
-    except:
-        time.sleep(10)
-        page_cards = driver.find_elements(By.CLASS_NAME, "SiteCard_siteCard__3fd1c")
-        button = page_cards[index].find_element(By.TAG_NAME, "button")
-        button.click()
-    time.sleep(1.5)
+    current_page = page_cards[index]
+    wait = WebDriverWait(current_page, 15)
+    button = wait.until(EC.element_to_be_clickable((By.TAG_NAME, "button")))
+    click_button(driver,button)
 
+def find_page_cards(driver):
+    wait = WebDriverWait(driver, 15)
+    return wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME,"SiteCard_siteCard__3fd1c")))
+
+def find_title(driver):
+    wait = WebDriverWait(driver, 10)
+    title = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "PageHeaderMenu_pageHeader__ctcly")))
+    return title
 def get_data_from_card(driver):
     d = {}
-
-    panels = driver.find_elements(By.CLASS_NAME,"Box_box__BlkYt")
-    if(len(panels)== 0):
-        time.sleep(5)
-        panels = driver.find_elements(By.CLASS_NAME, "Box_box__BlkYt")
+    wait = WebDriverWait(driver, 15)
+    panels = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "Box_box__BlkYt")))
     for panel in panels:
         elements = {}
         panel_header = panel.find_element(By.CLASS_NAME,"header").text
@@ -68,13 +70,7 @@ def get_data_from_card(driver):
                 d["Commercial email"] = elements["Email"]
         elif panel_header == "Certification Details":
             d["Standard"] = elements["Standard"]
-    try:
-        title = driver.find_element(By.CLASS_NAME, "PageHeaderMenu_pageHeader__ctcly")
-    except:
-        time.sleep(2)
-        title = driver.find_element(By.CLASS_NAME, "PageHeaderMenu_pageHeader__ctcly")
-    d["Account name"] = title.text
-
+    d["Account name"] = find_title(driver).text
     return d
 
 def write_dicts_to_json(dicts_list):
@@ -95,15 +91,13 @@ def write_dicts_to_json(dicts_list):
 def skip_pages(driver,number):
     i=0
     while i < number:
-        next_page_button = find_next_page_button(driver)
-        try:
-            next_page_button.click()
-            time.sleep(1)
-        except:
-            time.sleep(5)
-            next_page_button.click()
+        button = find_next_page_button(driver)
+        click_button(driver,button)
         i += 1
         continue
+
+def click_button(driver,button):
+    driver.execute_script("arguments[0].click();", button)
 
 def setup_driver():
     options = Options()
