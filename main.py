@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from functions import *
+import subprocess
 
 default_interval = 0.5
 
@@ -7,7 +8,7 @@ parser = ArgumentParser('Scrape data of bgrc directory')
 parser.add_argument('-c',dest="country",help="country to be scraped")
 parser.add_argument('-s',dest="skip_pages",help="how many pages to skip")
 parser.add_argument('-r',dest="headless",help="headless")
-parser.add_argument('-i',dest="interval",help="interval of retrieving data")
+parser.add_argument('-i',dest="interval",help="time interval of retrieving data")
 
 arguments = parser.parse_args()
 
@@ -50,3 +51,5 @@ if __name__ == '__main__':
         click_button(driver,next_page_button)
 
     driver.close()
+
+subprocess.run(['python', "jsonFiles/to_excel.py"])
