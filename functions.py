@@ -7,44 +7,47 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
+default_wait_value = 15
+def wait_until_present_elements(driver,by,value):
+    return WebDriverWait(driver, default_wait_value).until(EC.presence_of_all_elements_located((by, value)))
+
+
+def wait_until_clickable_element(driver,by,value):
+    return WebDriverWait(driver, default_wait_value).until(
+        EC.element_to_be_clickable((by, value)))
+
 def find_cards_for_country(driver,country):
-    element = WebDriverWait(driver, 15).until(
-        EC.element_to_be_clickable((By.CLASS_NAME, "MuiAccordionSummary-content")))
+    element = wait_until_clickable_element(driver,By.CLASS_NAME, "MuiAccordionSummary-content")
     element.click()
-    element = WebDriverWait(driver, 15).until(
-        EC.element_to_be_clickable((By.CLASS_NAME, "searchable-dropdown")))
+    element = wait_until_clickable_element(driver,By.CLASS_NAME, "searchable-dropdown")
     element.click()
     input = element.find_element(By.TAG_NAME, "input")
     input.send_keys(country)
-    driver.find_element(By.CLASS_NAME, "MuiAutocomplete-popper").click()
+    wait_until_clickable_element(driver,By.CLASS_NAME, "MuiAutocomplete-popper").click()
     time.sleep(2)
 
 def find_next_page_button(driver):
-    wait = WebDriverWait(driver, 10)
-    return wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Go to next page']")))
+    return wait_until_clickable_element(driver,By.XPATH, "//button[@aria-label='Go to next page']")
 
 def is_next_page_enabled(driver):
     return driver.find_elements(By.CLASS_NAME, "MuiPaginationItem-root")[1].is_enabled()
 
 def enter_page_at_index(driver,index):
-    page_cards = driver.find_elements(By.CLASS_NAME, "SiteCard_siteCard__3fd1c")
+    page_cards = wait_until_present_elements(driver,By.CLASS_NAME, "SiteCard_siteCard__3fd1c")
     current_page = page_cards[index]
-    wait = WebDriverWait(current_page, 15)
-    button = wait.until(EC.element_to_be_clickable((By.TAG_NAME, "button")))
+    button = current_page.find_element(By.TAG_NAME, "button")
     click_button(driver,button)
 
 def find_page_cards(driver):
-    wait = WebDriverWait(driver, 15)
-    return wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME,"SiteCard_siteCard__3fd1c")))
+    return wait_until_present_elements(driver,By.CLASS_NAME,"SiteCard_siteCard__3fd1c")
 
 def find_title(driver):
-    wait = WebDriverWait(driver, 10)
-    title = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "PageHeaderMenu_pageHeader__ctcly")))
-    return title
+    return wait_until_present_elements(driver,By.CLASS_NAME, "PageHeaderMenu_pageHeader__ctcly")[0]
+
 def get_data_from_card(driver):
     d = {}
-    wait = WebDriverWait(driver, 15)
-    panels = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "Box_box__BlkYt")))
+    panels = wait_until_present_elements(driver,By.CLASS_NAME, "Box_box__BlkYt")
     for panel in panels:
         elements = {}
         panel_header = panel.find_element(By.CLASS_NAME,"header").text
