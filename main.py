@@ -52,4 +52,4 @@ if __name__ == '__main__':
 
     driver.close()
 
-subprocess.run(['python', "jsonFiles/to_excel.py"])
+subprocess.run(['python', "to_excel.py"])
