@@ -4,15 +4,17 @@ import time
 import os
 import json
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-def filter_only_spain_cards(driver):
+def find_cards_for_country(driver,country):
     element = driver.find_element(By.CLASS_NAME, "MuiAccordionSummary-content")
     element.click()
     time.sleep(1)
     element = driver.find_element(By.CLASS_NAME, "searchable-dropdown")
     element.click()
     input = element.find_element(By.TAG_NAME, "input")
-    input.send_keys("Spain")
+    input.send_keys(country)
     driver.find_element(By.CLASS_NAME, "MuiAutocomplete-popper").click()
     time.sleep(2)
 
@@ -89,7 +91,8 @@ def write_dicts_to_json(dicts_list):
                     json.dump(data, file)
         except:
             print(data)
-def skip_pages(number):
+
+def skip_pages(driver,number):
     i=0
     while i < number:
         next_page_button = find_next_page_button(driver)
@@ -101,8 +104,9 @@ def skip_pages(number):
             next_page_button.click()
         i += 1
         continue
+
 def setup_driver():
     options = Options()
     options.add_argument("-headless")
-    driver = webdriver.Firefox(options)
+    driver = webdriver.Firefox()
     return driver
