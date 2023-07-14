@@ -7,7 +7,6 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
 default_wait_value = 15
 def wait_until_present_elements(driver,by,value):
     return WebDriverWait(driver, default_wait_value).until(EC.presence_of_all_elements_located((by, value)))
@@ -104,9 +103,13 @@ def click_button(driver,button):
 
 def setup_driver(headless):
     options = Options()
-    options.add_argument("-headless")
+    options.add_argument("--disable-web-security")
+    options.add_argument("--disable-features=IsolateOrigins,site-per-process")
+    options.accept_insecure_certs = True
+    options.set_preference("security.insecure_field_warning.contextual.enabled", False)
+    options.set_preference("security.insecure_password.ui.enabled", False)
+    options.set_preference("security.certerrors.permanentOverride = false", False)
+    options.set_preference("security.enterprise_roots.enabled", True)
     if headless:
-        driver = webdriver.Firefox(options)
-    else:
-        driver = webdriver.Firefox()
-    return driver
+        options.add_argument("-headless")
+    return webdriver.Firefox(options)
