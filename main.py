@@ -1,19 +1,19 @@
-from argparse import ArgumentParser
 from functions import *
 import subprocess
+import argparse
 
 default_interval = 0.5
 
-parser = ArgumentParser('Scrape data of bgrc directory')
+parser = argparse.ArgumentParser('Scrape data of bgrc directory')
 parser.add_argument('-c',dest="country",help="country to be scraped")
 parser.add_argument('-s',dest="skip_pages",help="how many pages to skip")
-parser.add_argument('-r',dest="headless",help="headless")
+parser.add_argument('-r', dest="headless", help="headless", action='store_true')
 parser.add_argument('-i',dest="interval",help="time interval of retrieving data")
 
 arguments = parser.parse_args()
 
 if arguments.interval:
-    interval = int(arguments.interval)
+    interval = float(arguments.interval)
 else:
     interval = default_interval
 
@@ -29,8 +29,7 @@ else:
 
 print(f"Starting scraping for country {country}")
 print(f"Skipping initial {skip_pages_number} pages")
-
-driver = setup_driver()
+driver = setup_driver(arguments.headless)
 driver.get("https://directory.brcgs.com/")
 
 if __name__ == '__main__':

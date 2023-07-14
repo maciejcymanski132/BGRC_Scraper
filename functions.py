@@ -102,8 +102,11 @@ def skip_pages(driver,number):
 def click_button(driver,button):
     driver.execute_script("arguments[0].click();", button)
 
-def setup_driver():
+def setup_driver(headless):
     options = Options()
     options.add_argument("-headless")
-    driver = webdriver.Firefox()
+    if headless:
+        driver = webdriver.Firefox(options)
+    else:
+        driver = webdriver.Firefox()
     return driver
