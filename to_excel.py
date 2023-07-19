@@ -3,29 +3,39 @@ import pandas as pd
 import json
 
 # Set the path to the folder containing the JSON files
-folder_path = 'jsonFiles/.'
+folder_path = 'jsonFiles'
 
-# Create an empty list to store the DataFrames
-dfs = []
+# Create a folder named "sheets" in the current directory
+sheets_folder = os.path.join(os.getcwd(), 'sheets')
+os.makedirs(sheets_folder, exist_ok=True)
 
-# Iterate over the JSON files in the folder
-for filename in os.listdir(folder_path):
-    if filename.endswith('.json'):
-        file_path = os.path.join(folder_path, filename)
+# Iterate over the directories in the folder
+for country_dir in os.listdir(folder_path):
+    country_dir_path = os.path.join(folder_path, country_dir)
 
-        # Read the JSON file into a dictionary
-        with open(file_path, 'r') as file:
-            data = json.load(file)
+    # Check if the item in the folder is a directory
+    if os.path.isdir(country_dir_path):
+        # Create an empty list to store the DataFrames for the country
+        dfs = []
 
-        # Convert the dictionary into a DataFrame
-        temp_df = pd.DataFrame.from_records([data])
+        # Iterate over the JSON files in the country directory
+        for filename in os.listdir(country_dir_path):
+            if filename.endswith('.json'):
+                file_path = os.path.join(country_dir_path, filename)
 
-        # Append the temporary DataFrame to the list
-        dfs.append(temp_df)
+                # Read the JSON file into a dictionary
+                with open(file_path, 'r') as file:
+                    data = json.load(file)
 
-# Concatenate all DataFrames in the list into a single DataFrame
-df = pd.concat(dfs, ignore_index=True)
+                # Convert the dictionary into a DataFrame
+                temp_df = pd.DataFrame.from_records([data])
 
-# Create a new Excel file and save the DataFrame
-output_path = 'file.xlsx'
-df.to_excel(output_path, index=False)
+                # Append the temporary DataFrame to the list
+                dfs.append(temp_df)
+
+        # Concatenate all DataFrames in the list into a single DataFrame
+        df = pd.concat(dfs, ignore_index=True)
+
+        # Create a new Excel file and save the DataFrame in the sheets folder
+        output_path = os.path.join(sheets_folder, f'{country_dir}.xlsx')
+        df.to_excel(output_path, index=False)
